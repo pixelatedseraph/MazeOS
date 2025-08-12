@@ -32,7 +32,7 @@ Jumps to the kernel’s start address, handing over full control to MazeOS
 
 
 
-To get this running on your system (any distro which is arch based)
+To get this running on your system (arch based distros)
 1. sudo pacman -S qemu-full qemu-emulators-full virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat libvirt
 2. sudo systemctl enable libvirtd
 3. sudo systemctl start --now libvirtd
