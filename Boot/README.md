@@ -29,3 +29,19 @@ Step 5: Jump to Kernel Entry Point
 
 Cortus sets CPU state for kernel
 Jumps to the kernel’s start address, handing over full control to MazeOS
+
+
+
+To get this running on your system (any distro which is arch based)
+1. sudo pacman -S qemu-full qemu-emulators-full virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat libvirt
+2. sudo systemctl enable libvirtd
+3. sudo systemctl start --now libvirtd
+4. sudo usermod -aG libvirt $(whoami)
+5. newgrp libvirt
+6. sudo EDITOR=nano virsh net-edit default
+7. sudo systemctl restart libvirtd
+8. sudo virsh net-start default
+9. sudo virsh net-autostart default
+10. qemu-system-x86_64 --version
+11. sudo virsh net-list --all
+12. virt-manage
