@@ -1,3 +1,4 @@
+<img width="121" height="519" alt="bootloader drawio" src="https://github.com/user-attachments/assets/2a6fdc8e-c05c-40dd-b02f-ac0ad4bc7b89" />
 The bootloader Employed by MazeOS is "CortusBootManager"(CBM).
 
 The flow breakdown is as follows
