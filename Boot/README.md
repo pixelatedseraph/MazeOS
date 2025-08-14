@@ -1,48 +1,65 @@
-<img width="121" height="519" alt="bootloader drawio" src="https://github.com/user-attachments/assets/2a6fdc8e-c05c-40dd-b02f-ac0ad4bc7b89" />
-The bootloader Employed by MazeOS is "CortusBootManager"(CBM).
+# MazeOS Bootloader: CortusBootManager (CBM)
 
-The flow breakdown is as follows
+**CortusBootManager (CBM)** is the bootloader for **MazeOS**, responsible for initializing the CPU, setting up memory, and loading the kernel.
 
-Step 1: The Origin
+---
 
-BIOS loads Cortus at 0x7C00 and loads it into physical memory address
-0x0000:0x7C00  (linear address 0x7C00)  
-CPU starts executing CBM in Real Mode.
+## Boot Flow Overview
 
-Step 2: Registers & Segments Setup
+### Step 1: The Origin
+- BIOS loads Cortus at `0x7C00` (physical memory: `0x0000:0x7C00`, linear: `0x7C00`)  
+- CPU starts executing CBM in **Real Mode**.
 
-CPU uses segemented addressing in real mode
-Cortus sets up segement registers(CS, DS, ES, SS).
+### Step 2: Registers & Segments Setup
+- CPU uses **segmented addressing** in real mode.  
+- Cortus sets up segment registers:
+  - `CS`, `DS`, `ES`, `SS`
 
-Step 3: Stack Initialization
+### Step 3: Stack Initialization
+- Initializes stack near `0x7000` (safe low memory)  
+- Loads `SS` and `SP` registers for stable push/pop  
+- Protects against crashes during boot code execution
 
-Bootloader initializes stack around 0x7000 (or nearby safe low-memory)
-Loads SS and SP registers for stable push/pop operations
-Protects against crashes during boot code execution.
+### Step 4: Kernel Loading
+- Uses BIOS interrupt `int 0x13` to read disk sectors  
+- Loads MazeOS kernel binary:
+  - Usually above `0x1000`  
+  - Or at `0x100000` (1MB mark)  
+- Prepares kernel for execution
 
-Step 4: Kernel Loading
+### Step 5: Jump to Kernel Entry Point
+- Cortus sets CPU state for kernel  
+- Jumps to the kernel’s start address, handing full control to MazeOS
 
-Uses BIOS interrupt int 0x13 to read disk sectors
-Loads MazeOS kernel binary into memory (usually above 0x1000 or at 0x100000 — 1MB mark)
-Prepares kernel for execution.
+---
 
-Step 5: Jump to Kernel Entry Point
+## 💻 Running MazeOS on Arch-based Distros
 
-Cortus sets CPU state for kernel
-Jumps to the kernel’s start address, handing over full control to MazeOS
+```bash
+# Install required packages
+sudo pacman -S qemu-full qemu-emulators-full virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat libvirt
 
+# Enable and start libvirtd
+sudo systemctl enable libvirtd
+sudo systemctl start --now libvirtd
 
+# Add current user to libvirt group
+sudo usermod -aG libvirt $(whoami)
+newgrp libvirt
 
-To get this running on your system (arch based distros)
-1. sudo pacman -S qemu-full qemu-emulators-full virt-manager virt-viewer dnsmasq vde2 bridge-utils openbsd-netcat libvirt
-2. sudo systemctl enable libvirtd
-3. sudo systemctl start --now libvirtd
-4. sudo usermod -aG libvirt $(whoami)
-5. newgrp libvirt
-6. sudo EDITOR=nano virsh net-edit default
-7. sudo systemctl restart libvirtd
-8. sudo virsh net-start default
-9. sudo virsh net-autostart default
-10. qemu-system-x86_64 --version
-11. sudo virsh net-list --all
-12. virt-manage
+# Edit default network config
+sudo EDITOR=nano virsh net-edit default
+
+# Restart libvirtd and start default network
+sudo systemctl restart libvirtd
+sudo virsh net-start default
+sudo virsh net-autostart default
+
+# Verify QEMU installation
+qemu-system-x86_64 --version
+
+# List all networks
+sudo virsh net-list --all
+
+# Launch GUI manager
+virt-manager
