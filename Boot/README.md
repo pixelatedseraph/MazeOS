@@ -6,34 +6,51 @@
 
 ## Boot Flow Overview
 
-### Step 1: The Origin
-- BIOS loads Cortus at `0x7C00` (physical memory: `0x0000:0x7C00`, linear: `0x7C00`)  
-- CPU starts executing CBM in **Real Mode**.
+### Step 1: Power Up
+- System powers on and CPU begins execution at **`0x7C00`**.  
+- Bootloader (**CortusBootManager**) is loaded into memory.  
+- CPU is in **Real Mode (16-bit)**.
 
-### Step 2: Registers & Segments Setup
-- CPU uses **segmented addressing** in real mode.  
-- Cortus sets up segment registers:
-  - `CS`, `DS`, `ES`, `SS`
+### Step 2: BIOS Initialization
+- BIOS performs **POST (Power-On Self Test)** to check CPU, memory, and hardware.  
+- Initializes hardware for booting.  
+- Prepares system to load the bootloader.
 
-### Step 3: Stack Initialization
-- Initializes stack near `0x7000` (safe low memory)  
-- Loads `SS` and `SP` registers for stable push/pop  
-- Protects against crashes during boot code execution
+### Step 3: CortusBootManager Execution
+- CBM executes from `0x7C00`.  
+- Uses BIOS interrupts to load kernel from disk.  
+- Performs early system checks and memory layout setup.  
+- Acts as a bridge between **16-bit BIOS** and **32-bit kernel**.
 
-### Step 4: Kernel Loading
-- Uses BIOS interrupt `int 0x13` to read disk sectors  
-- Loads MazeOS kernel binary:
+### Step 4: Stack & Segment Setup
+- Initializes stack at a safe low-memory address (e.g., `0x7000`).  
+- Loads segment registers for stable memory access:  
+  - `CS`, `DS`, `ES`, `SS`  
+- Protects against crashes during boot code execution.
+
+### Step 5: Kernel Loading
+- Uses BIOS interrupt **`int 0x13`** to read disk sectors.  
+- Loads MazeOS kernel binary into memory:  
   - Usually above `0x1000`  
-  - Or at `0x100000` (1MB mark)  
-- Prepares kernel for execution
+  - Often at `0x100000` (1MB mark) for protected mode  
+- Prepares kernel for execution.
 
-### Step 5: Jump to Kernel Entry Point
-- Cortus sets CPU state for kernel  
-- Jumps to the kernel’s start address, handing full control to MazeOS
+### Step 6: Switch to Protected Mode
+- MazeOS kernel sets up **Global Descriptor Table (GDT)**.  
+- Enables **32-bit protected mode** on the CPU.  
+- Prepares CPU registers and memory for full kernel execution.
 
----
+### Step 7: Jump to Kernel Entry Point
+- CBM or early kernel sets CPU state for kernel execution.  
+- Jumps to the kernel’s **entry point**, handing full control to MazeOS.  
+- Kernel begins initializing subsystems (memory, interrupts, scheduler, etc.).
 
-## 💻 Running MazeOS on Arch-based Distros
+## Visual Flow
+
+<img width="121" height="519" alt="BootloaderProcess1 drawio" src="https://github.com/user-attachments/assets/a944e258-9a9f-4e65-9eff-f8ad14e7c773" />
+
+
+##  Running MazeOS (Arch-based Distros)
 
 ```bash
 # Install required packages
