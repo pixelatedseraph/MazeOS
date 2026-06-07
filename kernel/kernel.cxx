@@ -160,6 +160,14 @@ namespace String{
 
 
 namespace VGA{ // c-styled api for c++ kernel
+    volatile uint16_t* UniversalVgaBuffer  = (volatile uint16_t*)0xB8000;
+
+    constexpr uint32_t vgaRows = 25;
+    constexpr uint32_t vgaCols = 80;
+
+    static uint32_t index = 0; //linear vga buffer indexing
+    static uint32_t currentRow = 1;
+    static uint32_t currentCol = 1;
 
     //different color schemes
     void writeChar(uint8_t ch, uint8_t fg,uint8_t bg,uint32_t index){
@@ -169,10 +177,13 @@ namespace VGA{ // c-styled api for c++ kernel
     }
     //for the classic white-on-black color scheme
     void writeChar(uint8_t ch){
-        static uint32_t index = 0;
         uint16_t attribute = (0x0 << 4 ) | (0x0F & 0x0F); //  white on black
-        volatile uint16_t* UniversalVgaBuffer  = (volatile uint16_t*)0xB8000;
+        if(currentCol > vgaCols) {
+            currentCol = 1;
+            currentRow +=1;
+        }
         UniversalVgaBuffer[index++] = ch | (attribute << 8);
+        currentCol++;
     }
 
     //printing a string by looping writeChar function
@@ -200,7 +211,15 @@ namespace VGA{ // c-styled api for c++ kernel
         finalBuffer[String::reverse(finalBuffer,stringBuffer)] = '\0';
         writeString(finalBuffer);
     }
-
+    //sets the provided line with empty character
+    void clearLine(uint32_t lineNumber){
+        uint32_t start =   VGA::vgaCols * (lineNumber - 1)  + (1 - 1);
+        uint32_t end   =   VGA::vgaCols * (lineNumber - 1)  + (VGA::vgaCols - 1);
+        for(start; start <= end ; ++start){
+            UniversalVgaBuffer[start] = ' ';
+        }
+    }
+    
 
     //consumes a c-styled string to modify the vga memory buffer (discarded)
     void primitivePrint(const char* str){ //error when two instances of this function are called
@@ -218,13 +237,38 @@ namespace Console{ // Handles Printing Text and Accepting I/P from keyboard
     template<typename... Args>
     void print(Args... args){
         (VGA::write(args),...);
+        if(VGA::currentCol <= VGA::vgaCols)
+            VGA::write(' ');
+    }
+    template<typename... Args>
+    void println(Args... args){
+        (print(args),...);
+        uint32_t start =   VGA::vgaCols * (VGA::currentRow - 1)  + (VGA::currentCol - 1);
+        uint32_t end   =   VGA::vgaCols * (VGA::currentRow - 1)  + (VGA::vgaCols - 1);
+        for(start; start <= end ; ++start){
+           VGA::writeChar(' '); 
+        }
     }
 }
 
-extern "C" void kernel_main(void* multiboot_struct,unsigned int magic_number){ //accept multiboot structure     
-    char result[32];
-    String::toHex(reinterpret_cast<uintptr_t>(&kernel_main),result);
-    Console::print("kernel_main : ",result);
+extern "C" void kernel_main(
+    void* multiboot_struct,
+    unsigned int magic_number
+)
+{      
+    int foo = 123;
+    int bar = 123;
+    int res = (foo + bar) / 100;
 
+    char result[32];
+    //String::toHex(reinterpret_cast<uintptr_t>(&kernel_main),result);
+    Console::println("Welcome to MazeOS - a monolithic kernel that embraces c++ as its source language");
+    Console::println("This project is licensed under GPLV3");
+    Console::println("Author : Mazeed A.");
+    Console::println(foo,bar,res);
+   
+    String::toHex(reinterpret_cast<uintptr_t>(&foo),result);
+    Console::println(result);
+    
     while(1);
 }
