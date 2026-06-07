@@ -44,14 +44,22 @@ namespace TraitBounds{
 
 
  template<typename T>
-// T foo(T data){
-//     std::cout<<
-//     return data;
-// }
+T foo(T data){
+     if constexpr(TraitBounds::is_same_v<T,int>){
+        std::cout<<"Deduced Int"<<std::endl;
+     }
+     else if constexpr(TraitBounds::) {
+        std::cout<<""
+     }
+
+     return data;
+ }
 // use if constexpr(TraitBounds::is_same_v<T,U>)
 int main(){
-    
+                
+
+
     static_assert(TraitBounds::is_same<int,float>::value); // if static_assert fails , the compilation fails altogther
-    
+    static
     return 0;
 }
