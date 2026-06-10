@@ -1,35 +1,6 @@
 #include<stdint.h>
 #include "gdt.hxx"
-
-#define CHAR_MAX  127
-#define CHAR_MIN -128
-
-#define UNSIGNED_CHAR_MAX 255
-#define UNSIGNED_CHAR_MIN 0
-
-#define SHORT_MAX  32767
-#define SHORT_MIN -32768
-
-#define UNSIGNED_SHORT_MAX 65535
-#define UNSIGNED_SHORT_MIN 0
-
-#define INT_MAX  2147483647
-#define INT_MIN -2147483648
-
-#define UNSIGNED_INT_MAX 4294967295
-#define UNSIGNED_INT_MIN 0
-
-#define LONG_MAX INT_MAX
-#define LONG_MIN INT_MIN
-
-#define UNSIGNED_LONG_MAX UNSIGNED_INT_MAX
-#define UNSIGNED_LONG_MIN UNSIGNED_INT_MIN
-
-#define LONG_LONG_MAX 9223372036999999999
-#define LONG_LONG_MIN -9223372037000000000
-
-#define UNSIGNED_LONG_LONG_MAX 18446744069999999999
-#define UNSIGNED_LONG_LONG_MIN 0
+#include "limits.hxx"
 
 #define loop while(1)
 #define no_mangle extern "C"
@@ -278,6 +249,7 @@ no_mangle void kernel_main(
 )
 {
     GlobalDescriptorTable gdt;
-    Console::println("Welcome to MazeOS");
+
+    Console::println("[OK] GDT Loaded Correctly");
     loop{}
 }

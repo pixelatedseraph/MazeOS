@@ -5,7 +5,7 @@
 
 class GlobalDescriptorTable{
     public:
-       class SegementDescriptor{
+       class [[gnu::packed]] SegementDescriptor {
         private:
             uint16_t LimitLow;
             uint16_t BaseLow;
@@ -19,11 +19,11 @@ class GlobalDescriptorTable{
             uint32_t Base();
             uint32_t Limit();
 
-       } __attribute__((packed)); 
+       }; 
     
     SegementDescriptor nullSegementSelector;
-    SegementDescriptor unusedSegementSelector;       
-    SegementDescriptor codeSegementSelector;       
+    SegementDescriptor unusedSegementSelector;
+    SegementDescriptor codeSegementSelector;
     SegementDescriptor dataSegementSelector;
     
     GlobalDescriptorTable();

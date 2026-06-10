@@ -1,5 +1,8 @@
 #include"gdt.hxx"
 
+//Author : Mazeed A.
+//License : GPL v3
+
 GlobalDescriptorTable::GlobalDescriptorTable()
 : nullSegementSelector(0,0,0),
   unusedSegementSelector(0,0,0),
