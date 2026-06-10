@@ -1,4 +1,5 @@
 #include<stdint.h>
+#include "gdt.hxx"
 
 #define CHAR_MAX  127
 #define CHAR_MIN -128
@@ -30,6 +31,8 @@
 #define UNSIGNED_LONG_LONG_MAX 18446744069999999999
 #define UNSIGNED_LONG_LONG_MIN 0
 
+#define loop while(1)
+#define no_mangle extern "C"
 
 namespace TraitBounds{
     template<typename T>
@@ -220,6 +223,14 @@ namespace VGA{ // c-styled api for c++ kernel
         }
     }
     
+    void clearScreen(){
+        for(int i = 1 ; i <= 25; ++i){
+            clearLine(i);
+        }
+        index = 0;
+        currentCol = 1;
+        currentRow = 1;
+    }
 
     //consumes a c-styled string to modify the vga memory buffer (discarded)
     void primitivePrint(const char* str){ //error when two instances of this function are called
@@ -251,24 +262,22 @@ namespace Console{ // Handles Printing Text and Accepting I/P from keyboard
     }
 }
 
-extern "C" void kernel_main(
+typedef void (*constructor) ();
+
+no_mangle constructor start_ctors;
+no_mangle constructor end_ctors;
+no_mangle void call_constructors(){
+    for(constructor* i = &start_ctors ; i != &end_ctors; ++i){
+        (*i)();
+    }
+}
+
+no_mangle void kernel_main(
     void* multiboot_struct,
     unsigned int magic_number
 )
-{      
-    int foo = 123;
-    int bar = 123;
-    int res = (foo + bar) / 100;
-
-    char result[32];
-    //String::toHex(reinterpret_cast<uintptr_t>(&kernel_main),result);
-    Console::println("Welcome to MazeOS - a monolithic kernel that embraces c++ as its source language");
-    Console::println("This project is licensed under GPLV3");
-    Console::println("Author : Mazeed A.");
-    Console::println(foo,bar,res);
-   
-    String::toHex(reinterpret_cast<uintptr_t>(&foo),result);
-    Console::println(result);
-    
-    while(1);
+{
+    GlobalDescriptorTable gdt;
+    Console::println("Welcome to MazeOS");
+    loop{}
 }
