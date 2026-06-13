@@ -2,6 +2,7 @@
 
 .global isr0
 .global isr13
+.global isr8
 
 .extern divide_handler
 .extern gpf_handler
@@ -13,6 +14,13 @@ isr0:
 
     popa
     iret
+
+
+isr8:
+1:
+    cli
+    hlt
+    jmp 1b
 
 isr13:
     pusha

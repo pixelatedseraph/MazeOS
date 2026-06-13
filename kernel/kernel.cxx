@@ -27,14 +27,6 @@ no_mangle void kernel_main(
     GlobalDescriptorTable gdt;
     idt_init();
 
-    Console::println("[OK] GDT Loaded Correctly");
-    Console::println("[OK] IDT Loaded Correctly");
-    Console::printHex(0xdeadbeef);
-    int x = 10;
-    int y = 10;
-    int z = 10;
-    Console::printHex((uintptr_t)&x,(uintptr_t)&y,(uintptr_t)&z);
-
 
     loop{}
 }

@@ -3,35 +3,24 @@
 
 #include<stdint.h>
 
-class GlobalDescriptorTable{
-    public:
-       class [[gnu::packed]] SegementDescriptor {
-        private:
-            uint16_t LimitLow;
-            uint16_t BaseLow;
-            uint8_t  BaseHigh;
-            uint8_t  Access;
-            uint8_t  FlagLimitHigh;
-            uint8_t  BaseVeryHigh;
-        public:
-            SegementDescriptor(uint32_t base,uint32_t limit,uint8_t access);
-            
-            uint32_t Base();
-            uint32_t Limit();
+namespace GDT{
+    struct [[gnu::packed]] Entry{
+        uint16_t limit;
+        uint16_t baseLow;
+        uint8_t  baseMiddle;
+        uint8_t  acesss;
+        uint8_t  flags;
+        uint8_t  baseHigh;
+    };
 
-       }; 
-    
-    SegementDescriptor nullSegementSelector;
-    SegementDescriptor unusedSegementSelector;
-    SegementDescriptor codeSegementSelector;
-    SegementDescriptor dataSegementSelector;
-    
-    GlobalDescriptorTable();
-    ~GlobalDescriptorTable();
+    struct[[gnu::packed]] Reference{
+        uint16_t limit;
+        uint32_t base;
+    };
 
-    uint16_t getCodeSegementSelector();
-    uint16_t getDataSegementSelector();
-    
-};
 
+    void initGDT();
+    void setGDTEntry(uint32_t num,uint32_t base,uint32_t limit,uint8_t access,uint8_t flags);
+
+}
 #endif

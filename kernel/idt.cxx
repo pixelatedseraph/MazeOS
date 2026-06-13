@@ -1,4 +1,5 @@
 #include "./include/x86_arch/idt.h"
+#include "./include/kernel/console.h"
 
 static IDTEntry idt[256];
 
@@ -19,9 +20,10 @@ void idt_init()
 
     set_gate(0, isr0);     // divide by zero
     set_gate(13, isr13);   // general protection fault
-
+    set_gate(8, isr8);
     idtr.limit = sizeof(idt) - 1;
     idtr.base  = reinterpret_cast<uint32_t>(&idt);
 
     asm volatile("lidt %0" : : "m"(idtr));
+
 }

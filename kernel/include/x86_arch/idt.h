@@ -18,6 +18,7 @@ struct IDTPointer {
 
 extern "C" void isr0();
 extern "C" void isr13();
+extern "C" void isr8();
 
 void idt_init();
 
