@@ -1,5 +1,6 @@
 #include<stdint.h>
 #include "./include/x86_arch/gdt.h"
+#include "./include/x86_arch/idt.h"
 #include "./include/kernel/limits.h"
 #include "./include/kernel/traits.h"
 #include "./include/kernel/string.h"
@@ -7,8 +8,6 @@
 
 #define loop while(1)
 #define no_mangle extern "C"
-
-
 
 typedef void (*constructor) ();
 
@@ -26,8 +25,16 @@ no_mangle void kernel_main(
 )
 {
     GlobalDescriptorTable gdt;
+    idt_init();
 
     Console::println("[OK] GDT Loaded Correctly");
-    Console::println(1+2);
+    Console::println("[OK] IDT Loaded Correctly");
+    Console::printHex(0xdeadbeef);
+    int x = 10;
+    int y = 10;
+    int z = 10;
+    Console::printHex((uintptr_t)&x,(uintptr_t)&y,(uintptr_t)&z);
+
+
     loop{}
 }

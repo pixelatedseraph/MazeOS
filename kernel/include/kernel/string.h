@@ -1,7 +1,6 @@
 #ifndef __STRING_H
 #define __STRING_H
 
-
 #include<stdint.h>
 #include"traits.h"
 

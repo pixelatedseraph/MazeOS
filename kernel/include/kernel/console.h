@@ -20,6 +20,12 @@ namespace Console{ // Handles Printing Text and Accepting I/P from keyboard
            VGA::writeChar(' '); 
         }
     }
+    template<typename... Args>
+    void printHex(Args... args){
+        char tmpBuff [32];
+        ((String::toHex(args,tmpBuff),print(tmpBuff)),...);
+        
+    }
 }
 
 #endif

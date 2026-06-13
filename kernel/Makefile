@@ -3,7 +3,7 @@ ASMFLAGS = --32
 LD       = i386-elf-ld
 LDFLAGS  = -melf_i386 
 LIBGCC := $(shell i386-elf-gcc -print-libgcc-file-name)
-objects = loader.o gdt.o kernel.o vga.o string.o
+objects = loader.o gdt.o kernel.o vga.o string.o idt.o exceptions.o isr.o
 
 %.o: %.cxx
 	i386-elf-g++ $(CXXFLAGS) -c -o $@ -v $<
