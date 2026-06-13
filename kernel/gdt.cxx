@@ -1,4 +1,4 @@
-#include"gdt.hxx"
+#include"./include/x86_arch/gdt.h"
 
 //Author : Mazeed A.
 //License : GPL v3
