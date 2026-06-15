@@ -1,0 +1,36 @@
+.POSIX:
+.PHONY: all clean
+
+SOURCE = efi_main.c
+OBJ = $(SOURCE:.c=.o)
+DEPENDS = $(OBJS:.o=.d)
+TARGET = BOOTX64.EFI
+
+
+CC = clang \
+	-target x86_64-unknown-windows \
+	-fuse-ld=lld-link \
+	-Wl,-subsystem:efi_application \
+	-Wl,-entry:efi_main
+
+CFLAGS = \
+	-std=c23 \
+	-Wall \
+	-Wextra \
+	-Wpedantic \
+	-mno-red-zone \
+	-MMD		\
+	-ffreestanding \
+	-nostdlib 
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $@ $<
+	cp $(TARGET) ./UEFI-GPT-image-creator/
+
+-include $(DEPENDS)
+
+
+clean:
+	rm -rf $(TARGET) ./*.efi ./*.o ./*.d

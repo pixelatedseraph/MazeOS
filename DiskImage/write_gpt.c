@@ -23,6 +23,30 @@ typedef struct [[gnu::packed]]{
     uint16_t boot_signature;
 }MasterBootRecord;
 
+typedef __int128 int128_t;
+typedef unsigned __int128 uint128_t;
+
+
+typedef struct [[gnu::packed]]{
+    uint64_t signature;
+    uint32_t revision;
+    uint32_t header_size;
+    uint32_t header_crc32;
+    uint32_t reserved;
+    uint64_t my_lba;
+    uint64_t alt_lba;
+    uint64_t first_usable_lba;
+    uint64_t last_usable_lba;
+    uint128_t disk_guid;
+    uint64_t partition_entry_lba;
+    uint32_t number_of_partitions;
+    uint32_t size_of_partitions;
+    uint32_t partition_entry_array_crc32;
+    uint32_t reserved;
+
+}
+
+
 /* GLB Variables */
 char* image_name = "foo.img";
 uint64_t lba_size = 512;
@@ -36,10 +60,16 @@ uint64_t bytes_to_lbas(const uint64_t bytes){
     return (bytes / lba_size) + (bytes % lba_size > 0 ? 1 : 0);
 }
 
+void write_full_lba_size(FILE* image){
+    uint8_t zero_sector[512];
+    for(uint8_t i = 0 ; i < lba_size - sizeof zero_sector)
+}
+
 bool write_mbr(FILE* image){
 
-    if(image_size_lbas > 0xFFFFFFFF)
-        image_size_lbas = 0x100000000;
+    uint64_t mbr_image_lbas = image_size_lbas;
+    if(mbr_image_lbas > 0xFFFFFFFF)
+        mbr_image_lbas = 0x100000000;
     //MasterBootRecord
     MasterBootRecord mbr = {
         .boot_code = {0},
@@ -51,7 +81,7 @@ bool write_mbr(FILE* image){
             .os_type = 0xEE, // protective gpt
             .ending_chs = {0xFF,0xFF,0xFF},
             .starting_lba = 0x00000001,
-            .size_lba = image_size_lbas - 1,
+            .size_lba = mbr_image_lbas - 1,
         },
         .boot_signature = 0xAA55,
     };
@@ -59,6 +89,8 @@ bool write_mbr(FILE* image){
     if (fwrite(&mbr,1,sizeof mbr,image) != sizeof mbr)
         return false;
 
+    write_full_lba_size(image);
+    
     return true;
 }
 
