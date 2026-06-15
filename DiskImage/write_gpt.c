@@ -4,29 +4,56 @@
 #include<stdbool.h>
 #include<stdint.h>
 
+/* MBR Partition */
+typedef struct [[gnu::packed]] {
+    uint8_t boot_indicator;
+    uint8_t starting_chs[3];
+    uint8_t os_type;
+    uint8_t ending_chs[3];
+    uint32_t starting_lba;
+    uint32_t size_lba;
+}MasterBootRecordPartition;
+    
+/* Master Boot Record */
+typedef struct [[gnu::packed]]{
+    uint8_t boot_code[440];
+    uint32_t mbr_signature;
+    uint16_t unknown;
+    MasterBootRecordPartition partition[4];
+    uint16_t boot_signature;
+}MasterBootRecord;
+
+/* GLB Variables */
 char* image_name = "foo.img";
+uint64_t lba_size = 512;
+uint64_t esp_size = 1024 * 1024 * 33; //33MiB
+uint64_t data_size = 1024 * 1024 * 1; // 1 MiB
+uint64_t image_size = 0;
+uint64_t esp_lbas,data_lbas,image_lbas,image_size_lbas;
+
+
+uint64_t bytes_to_lbas(const uint64_t bytes){
+    return (bytes / lba_size) + (bytes % lba_size > 0 ? 1 : 0);
+}
 
 bool write_mbr(FILE* image){
-    typedef struct [[gnu::packed]] {
-        uint8_t boot_indicator;
-        uint8_t starting_chs[3];
-        uint8_t os_type;
-        uint8_t ending_chs[3];
-        uint8_t starting_lba;
-        uint8_t ending_lba;
-    }MasterBootRecordPartition;
-    
-    typedef struct [[gnu::packed]]{
-        uint8_t boot_code[400];
-        uint8_t mbr_signature;
-        uint16_t unknown;
-        MasterBootRecordPartition partition[4];
-        uint16_t boot_signature;
-    }MasterBootRecord;
 
-    //TODO 
+    if(image_size_lbas > 0xFFFFFFFF)
+        image_size_lbas = 0x100000000;
+    //MasterBootRecord
     MasterBootRecord mbr = {
-
+        .boot_code = {0},
+        .mbr_signature = 0,
+        .unknown = 0,
+        .partition[0] = {
+            .boot_indicator = 0,
+            .starting_chs = {0x00,0x02,0x00},
+            .os_type = 0xEE, // protective gpt
+            .ending_chs = {0xFF,0xFF,0xFF},
+            .starting_lba = 0x00000001,
+            .size_lba = image_size_lbas - 1,
+        },
+        .boot_signature = 0xAA55,
     };
     //write to file
     if (fwrite(&mbr,1,sizeof mbr,image) != sizeof mbr)
@@ -42,11 +69,13 @@ int main(){
         return EXIT_FAILURE;
     }
 
+    //Set sizes
+    image_size = esp_size + data_size + (1024*1024); //add padding for GPTs/MBR
+    image_size_lbas = bytes_to_lbas(image_size);
+
     if(!write_mbr(image)){
         fprintf(stderr,"[Error]: Couldnt Protective MBR for the file %s\n",image_name);
         return EXIT_FAILURE;
     }
-
-
     return EXIT_SUCCESS;
 }
