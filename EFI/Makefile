@@ -1,7 +1,7 @@
 .POSIX:
 .PHONY: all clean run
 
-SOURCE := efi_main.c
+SOURCE := efi_main.c efi_string.c
 OBJ := $(SOURCE:.c=.o)
 DEPENDS := $(OBJ:.o=.d)
 
@@ -33,7 +33,7 @@ $(ESP_DIR):
 	mkdir -p $@
 
 $(TARGET): $(OBJ) | $(ESP_DIR)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 run: $(TARGET)
 run: $(TARGET)
