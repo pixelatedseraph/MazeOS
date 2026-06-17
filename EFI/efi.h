@@ -69,7 +69,7 @@ typedef UINT64 EFI_LBA;
 typedef UINTN EFI_TPL;
 
 //EFI_STATUS codes - spec 2.11 Appendix D
-#define EFI_SUCCESS                         0ULL
+#define EFI_SUCCESS                         0
 #define EFI_LOAD_ERROR                      1 //image failed to load
 #define EFI_INVALID_PARAMETER               2
 #define EFI_UNSUPPORTED                     3

@@ -2,10 +2,11 @@
 #include<stdarg.h>
 #include"efi.h"
 #include"efi_string.h"
+#include"efi_glb.h"
+#include"efi_lib.h"
 
 #define loop while(1)
 
-EFI_SYSTEM_TABLE* GLB_SystemTable;
 
 
 VOID Print(CHAR16* String){
@@ -69,14 +70,8 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable)
      Println(L"Welcome To Verus Bootloader for UEFI ",L"Its so Cozy Haha");
      Println(L"All Rights Resrved to Mazeed ",L" Under GPLV3 ig idk");
 
-     VOID* HeapBlk;
+     VOID* HeapBlk = EFI_Malloc(1024);
 
-
-     EFI_STATUS Returncode = SystemTable->BootServices->AllocatePool(EfiLoaderData,1024,&HeapBlk);
-     if(Returncode != EFI_SUCCESS){
-          Print(L"Heap Allocation Failed\r\n");
-          goto exit;
-     }
 
      *((CHAR16*)HeapBlk)     =  L'w';
      *(((CHAR16*)HeapBlk)+1) =  L'a';
@@ -86,9 +81,9 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable)
      Print((CHAR16*)HeapBlk);
 
 
-     SystemTable->BootServices->FreePool(HeapBlk);
+     EFI_Free(HeapBlk);
 
-     exit:
+     //exit:
      loop{}
      return EFI_SUCCESS;
 }

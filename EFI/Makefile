@@ -1,7 +1,7 @@
 .POSIX:
 .PHONY: all clean run
 
-SOURCE := efi_main.c efi_string.c
+SOURCE := efi_main.c efi_string.c efi_lib.c efi_glb.c
 OBJ := $(SOURCE:.c=.o)
 DEPENDS := $(OBJ:.o=.d)
 
