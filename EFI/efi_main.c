@@ -27,7 +27,7 @@ VOID _Println(CHAR16* String,...){
      Print(L"\r\n");
 }
 
-
+//TODO
 UINT64 Printf(CHAR16* fmt,...){
      UINT64 Length;
 
@@ -36,7 +36,7 @@ UINT64 Printf(CHAR16* fmt,...){
 
      for(va_start(ap,fmt); *fmt != '\0'; ++fmt){
           //%d ->INT64
-          //Printf(L"Hello World: %d",5); -> Printf(L"Hello World: " + L"5")
+          //Printf(L"Hello World: %d %s",5,"Hey"); -> Printf(L"Hello World: " + L"5"+ L" " +L"Hey" )
           if(ESTR_CharacterEquals(*fmt,L'%') && (ESTR_PeekAhead(fmt) == L'd'))  {
                
           } 
@@ -48,14 +48,8 @@ UINT64 Printf(CHAR16* fmt,...){
           if(ESTR_CharacterEquals(*fmt,L'%') && (ESTR_PeekAhead(fmt) == L's'))  {} 
 
      }
-
-
-
-
      return Length;
 }
-
-
 
 
 EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable){
@@ -68,13 +62,33 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable)
      //Clears the screen
      //SystemTable->ConOut->ClearScreen(SystemTable->ConOut);
      //Writes to output device
-     //SystemTable->ConOut->SetAttribute(SystemTable->ConOut,EFI_TEXT_ATTR(EFI_GREEN,EFI_BACKGROUND_BLACK));
-     //Print(L"Hello ");
+     SystemTable->ConOut->SetAttribute(SystemTable->ConOut,EFI_TEXT_ATTR(EFI_WHITE,EFI_RED));
+     Print(L"Hello ");
 
    
      Println(L"Welcome To Verus Bootloader for UEFI ",L"Its so Cozy Haha");
      Println(L"All Rights Resrved to Mazeed ",L" Under GPLV3 ig idk");
 
+     VOID* HeapBlk;
+
+
+     EFI_STATUS Returncode = SystemTable->BootServices->AllocatePool(EfiLoaderData,1024,&HeapBlk);
+     if(Returncode != EFI_SUCCESS){
+          Print(L"Heap Allocation Failed\r\n");
+          goto exit;
+     }
+
+     *((CHAR16*)HeapBlk)     =  L'w';
+     *(((CHAR16*)HeapBlk)+1) =  L'a';
+     *(((CHAR16*)HeapBlk)+2) =  L'r';
+     *(((CHAR16*)HeapBlk)+3) =  L'\0';
+
+     Print((CHAR16*)HeapBlk);
+
+
+     SystemTable->BootServices->FreePool(HeapBlk);
+
+     exit:
      loop{}
      return EFI_SUCCESS;
 }
