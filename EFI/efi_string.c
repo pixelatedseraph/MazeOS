@@ -33,3 +33,22 @@ BOOLEAN ESTR_CharacterEquals(CHAR16 c1,CHAR16 c2){
 CHAR16 ESTR_PeekAhead(CHAR16* String){
     return *(String+1);
 }
+
+VOID* ESTR_MemoryCopy(VOID* Destination,CONST VOID* Source,UINTN Count){
+    for(UINTN Index = 0 ; Index < Count ; ++Index){
+        *(((UINT16*)Destination)+Index) = *(((UINT16*)Source)+Index);
+    }
+    return Destination;
+}
+VOID* ESTR_MemorySet(VOID* Destination, INT32 FillChar,UINTN Count){
+    for(UINTN Index = 0; Index < Count ; ++Index){
+        *(((UINT16*)Destination)+Index) = (CHAR16)FillChar;
+    }
+    return Destination;
+}
+
+//TODO
+INT32 ESTR_MemoryCompare(VOID* Buffer1,VOID* Buffer2,UINTN Count){
+    for(UINTN Index = 0; Index < Count ; ++Index){
+    }
+}

@@ -15,6 +15,10 @@
 
 VOID* EFI_Malloc(UINTN Size);
 
+VOID* EFI_Calloc(UINTN Count,UINTN Size);
+
+VOID* EFI_Realloc(VOID* Ptr,UINTN NewSize);
+
 VOID EFI_Free(VOID* Ptr);
 
 #endif
