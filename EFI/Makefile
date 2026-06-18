@@ -12,10 +12,11 @@ CC := clang
 
 CFLAGS := \
 	-target x86_64-unknown-windows \
-	-std=c23 \
+	-std=gnu23 \
 	-Wall \
 	-Wextra \
 	-Wpedantic \
+	-Werror		\
 	-mno-red-zone \
 	-MMD \
 	-ffreestanding \

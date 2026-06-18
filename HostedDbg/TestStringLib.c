@@ -42,38 +42,97 @@ CHAR16 ESTR_PeekAhead(CHAR16* String){
 }
 
 VOID* ESTR_MemoryCopy(VOID* Destination,CONST VOID* Source,UINTN Count){
+    CHAR8* Dest = (CHAR8*)Destination;
+    CHAR8* Src = (CHAR8*)Source;
+    
     for(UINTN Index = 0 ; Index < Count ; ++Index){
-        *(((UINT16*)Destination)+Index) = *(((UINT16*)Source)+Index);
+        Dest[Index] = Src[Index];
     }
     return Destination;
 }
-VOID* ESTR_MemorySet(VOID* Destination, INT32 FillChar,UINTN Count){
+VOID* ESTR_MemorySet(VOID* Destination, INT32 SetWith,UINTN Count){
+    INT32* Dest = (INT32*)Destination;
+
     for(UINTN Index = 0; Index < Count ; ++Index){
-        *(((UINT16*)Destination)+Index) = (CHAR16)FillChar;
+        Dest[Index]  = SetWith;
     }
     return Destination;
 }
 
-bool ESTR_MemoryCompare(VOID* Buffer1,VOID* Buffer2,UINTN Count){
-    bool is_same = false;
-    for(UINTN i = 0 ; i < Count ; ++i){
-        if( *(((CHAR16*)Buffer1)+i) != *(((CHAR16*)Buffer2)+i) ){
-            return is_same;
+INT32 ESTR_MemoryCompare(VOID* base1,VOID* base2,UINTN Limit){
+    for(UINTN Index = 0 ; Index < Limit ; ++Index){
+        if ((*(((unsigned char*)base1)+Index)) > (*(((unsigned char*)base2)+Index))){
+            return 1;
         }
+        else if(((*(((unsigned char*)base1)+Index)) < (*(((unsigned char*)base2)+Index)))){
+            return -1;
+        }
+        continue;
     }
-    is_same = true;
-    return is_same;
+    return 0;
 }
+
+void print_hex(void* base,uint32_t limit){
+    //printf("0x ");
+    for(uint32_t i = 0; i< limit ; ++i){
+        printf("%02X ",*(((unsigned char*)base)+i));
+    }
+    printf("\n");
+}
+
+
 
 int main(){
-    UINT16* str1 = u"hello";
-    UINT16* str2 = u"hello";
+    typedef struct Foo{
+        INT16 a;
+        INT32 b;
+        INT64 c;
+        UINT16 d;  
+        UINT32 e;  
+        UINT64 f;
+        
+        CHAR8  g;
+        CHAR16 h;
 
-    INT32 a  = 10;
-    INT32 b  = 10;
+        CHAR8*  normalStr;
+        CHAR16* wStr;
+    }Foo;
 
-    printf("%d\n",ESTR_MemoryCompare(str1,str2,ESTR_StringLength(str1)));
-    printf("%d\n",memcmp(&a,&b,sizeof(int)));
+    char* buff = malloc(64);
+    ESTR_MemoryCopy(buff,"Hello World",strlen("Hello World")+1); 
 
+    CHAR16* wide = malloc(sizeof(CHAR16) * 64);
+    ESTR_MemoryCopy(wide,L"WelcomeTOtEST",strlen("WelcomeTOtEST")+1);
+
+    Foo f1 = {.a = 3010,.b = -487784,.c= 263569238,
+              .d = 7634,.e = 5122681,.f = 90764576368,
+              .g = '!', .h = u'M',.normalStr = buff, .wStr = wide };
+    Foo f2 ;
+
+    ESTR_MemoryCopy(&f2,&f1,sizeof(f1));
+    //memcpy(&f2,&f1,sizeof(f1));
+
+    print_hex(&f1,sizeof(f1));
+
+    /*printf("%d %d %ld\n",f2.a,f2.b,f2.c);
+    printf("%d %d %ld\n",f2.d,f2.e,f2.f);
+    printf("%c %c\n",f2.g,f2.h);
+    printf("%s \n",f2.normalStr);*/
+    f2.a = -102;
+    print_hex(&f2,sizeof(f2));
+   
+    printf("%d %d\n",ESTR_MemoryCompare(&f1,&f2,sizeof f1),memcmp(&f1,&f2,sizeof f1));
+
+    int* blk = malloc(4*10);
+    ESTR_MemorySet(blk,42,10);
+
+    for(int i = 0 ; i < 10 ; ++i){
+        printf("%d ",blk[i]);
+    }
+    printf("\n");
+
+    free(buff);
+    free(wide);
+    free(blk);
     return 0;
 }

@@ -13,6 +13,12 @@
 #include"efi.h"
 #include"efi_glb.h"
 
+
+typedef struct EFI_ALLOC_HEAP_CANARY{
+    UINTN PointerSize;
+}EFI_ALLOC_HEAP_CANARY;
+
+
 VOID* EFI_Malloc(UINTN Size);
 
 VOID* EFI_Calloc(UINTN Count,UINTN Size);

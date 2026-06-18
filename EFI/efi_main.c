@@ -7,7 +7,7 @@
 
 #define loop while(1)
 
-//TODO Printf,Memory_*,Allocations,
+//TODO Printf,Memory_*,
 
 
 
@@ -32,7 +32,7 @@ VOID _Println(CHAR16* String,...){
 
 //TODO
 UINT64 Printf(CHAR16* fmt,...){
-     UINT64 Length;
+     UINT64 Length = 0;
 
      va_list ap;
      
@@ -72,16 +72,11 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable)
      Println(L"Welcome To Verus Bootloader for UEFI ",L"Its so Cozy Haha");
      Println(L"All Rights Resrved to Mazeed ",L" Under GPLV3 ig idk");
 
-     VOID* HeapBlk = EFI_Malloc(1024);
+     CHAR16* HeapBlk = EFI_Malloc(sizeof(CHAR16) * 100);
 
-
-     *((CHAR16*)HeapBlk)     =  L'w';
-     *(((CHAR16*)HeapBlk)+1) =  L'a';
-     *(((CHAR16*)HeapBlk)+2) =  L'r';
-     *(((CHAR16*)HeapBlk)+3) =  L'\0';
-
-     Print((CHAR16*)HeapBlk);
-
+     ESTR_MemoryCopy(HeapBlk,L"HELLO WORLD FRO 1M HEAP STRINGS",ESTR_StringLength(L"HELLO WORLD FROM HEAP STRINGS")+1);
+     
+     SystemTable->ConOut->OutputString(SystemTable->ConOut,HeapBlk);
 
      EFI_Free(HeapBlk);
 
