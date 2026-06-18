@@ -7,6 +7,8 @@
 
 #define loop while(1)
 
+//TODO Printf,Memory_*,Allocations,
+
 
 
 VOID Print(CHAR16* String){
