@@ -7,8 +7,7 @@
 
 #define loop while(1)
 
-//TODO Printf,Memory_*,
-
+//TODO Printf,Memory_*,DEBUG MEMORY ISSUES,RUN GDB SERVER ON PORT 1234 
 
 
 VOID Print(CHAR16* String){
@@ -30,7 +29,7 @@ VOID _Println(CHAR16* String,...){
      Print(L"\r\n");
 }
 
-//TODO
+//TODO FIRST FINISH Printf() Highest Priority
 UINT64 Printf(CHAR16* fmt,...){
      UINT64 Length = 0;
 
@@ -74,10 +73,9 @@ EFI_STATUS EFIAPI efi_main(EFI_HANDLE ImageHandle,EFI_SYSTEM_TABLE* SystemTable)
 
      CHAR16* HeapBlk = EFI_Malloc(sizeof(CHAR16) * 100);
 
-     ESTR_MemoryCopy(HeapBlk,L"HELLO WORLD FRO 1M HEAP STRINGS",ESTR_StringLength(L"HELLO WORLD FROM HEAP STRINGS")+1);
+     ESTR_MemoryCopy(HeapBlk,L"HELLO WORLD",ESTR_StringLength(L"HELLO WORLD")+1);
      
-     SystemTable->ConOut->OutputString(SystemTable->ConOut,HeapBlk);
-
+     
      EFI_Free(HeapBlk);
 
      //exit:

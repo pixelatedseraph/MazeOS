@@ -78,6 +78,10 @@ typedef UINTN EFI_TPL;
 #define EFI_OUT_OF_RESOURCES                9
 #define EFI_NOT_FOUND                       14
 
+
+
+
+
 //EFI_TABLE_HEADER spec 2.10 sec 4.2.1
 typedef struct{
     UINT64 Signature;
@@ -442,5 +446,43 @@ EFI_STATUS
     IN  EFI_HANDLE               ImageHandle,
     IN  EFI_SYSTEM_TABLE*        SystemTable
 );
+
+
+
+//EFI_LOADED_IMAGE_PROTOCOL spec 2.10 sec 9.1.1
+//Can be used on any image handle to obtain information about the loaded image.
+#define EFI_LOADED_IMAGE_PROTOCOL_GUID \
+  {0x5B1B31A1,0x9562,0x11d2,\
+    {0x8E,0x3F,0x00,0xA0,0xC9,0x69,0x72,0x3B}}
+
+//Revision Number
+#define EFI_LOADED_IMAGE_PROTOCOL_REVISION 0x1000     
+//TODO(EFI_LOADED_IMAGE_PROTOCOL) Implement the following tables and remove VOID
+#define EFI_DEVICE_PATH_PROTOCOL    VOID
+
+//EFI_LOADED_IMAGE_PROTOCOL
+typedef struct {
+   UINT32                        Revision;
+   EFI_HANDLE                    ParentHandle;
+   EFI_SYSTEM_TABLE*             SystemTable;
+
+   // Source location of the image
+   EFI_HANDLE                    DeviceHandle;
+   EFI_DEVICE_PATH_PROTOCOL*     FilePath;
+   VOID                          *Reserved;
+
+   // Image’s load options
+   UINT32                        LoadOptionsSize;
+   VOID                          *LoadOptions;
+
+   // Location where image was loaded
+   VOID                          *ImageBase;
+   UINT64                        ImageSize;
+   EFI_MEMORY_TYPE               ImageCodeType;
+   EFI_MEMORY_TYPE               ImageDataType;
+   EFI_IMAGE_UNLOAD              Unload;
+}EFI_LOADED_IMAGE_PROTOCOL;
+
+
 
 #endif
