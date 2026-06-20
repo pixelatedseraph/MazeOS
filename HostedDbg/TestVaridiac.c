@@ -113,32 +113,80 @@ static inline const char* _2byte_uinteger_to_string(uint16_t number){
         return buffer; 
 } 
 
-
-#define unsigned_integer_to_string(number) ({                                                                                                   \
-    typeof(number) _number = number;                                                                                                            \
+//caller aka print() must call free for this, the buffer recieved by reverse() is to be called
+#define unsigned_integer_to_string(number) ({                                                                                                           \
+    typeof(number) _number = number;                                                                                                                    \
     static_assert(__builtin_types_compatible_p(typeof(_number),uint16_t) ||                                                                             \
                   __builtin_types_compatible_p(typeof(_number),uint32_t) ||                                                                             \
-                  __builtin_types_compatible_p(typeof(_number),uint64_t),"[Error] Substitution failure is an error(sfiae)");                       \
-                                                                                                                                                \
-    static char _buffer[32];                                                                                                                    \
-    typeof(_number) _tmp = _number;                                                                                                             \
-    typeof(_number) _index = 0;                                                                                                                 \
-    typeof(_number) _current_digit;                                                                                                             \
-                                                                                                                                                \
-    if(_number == 0){                                                                                                                           \
-        _buffer[0] = 48;                                                                                                                        \
-        _buffer[1] = '\0';                                                                                                                      \
-        goto ret;                                                                                                                               \
-    }                                                                                                                                           \
-    while(_tmp > 0){                                                                                                                            \
-            _current_digit = _tmp % 10;                                                                                                         \
-            _buffer[_index++] = (char)(48 + _current_digit);                                                                                    \
-            _tmp = _tmp / 10;                                                                                                                   \
-        }                                                                                                                                       \
-        _buffer[_index] = '\0';                                                                                                                 \
-        ret:                                                                                                                                    \
-        _buffer;                                                                                                                                \
+                  __builtin_types_compatible_p(typeof(_number),uint64_t),"[Error] Substitution failure is an error(sfiae)");                            \
+                                                                                                                                                        \
+    char _buffer[32];                                                                                                                                   \
+    typeof(_number) _tmp = _number;                                                                                                                     \
+    typeof(_number) _index = 0;                                                                                                                         \
+    typeof(_number) _current_digit;                                                                                                                     \
+                                                                                                                                                        \
+    if(_number == 0){                                                                                                                                   \
+        _buffer[0] = 48;                                                                                                                                \
+        _buffer[1] = '\0';                                                                                                                              \
+    }                                                                                                                                                   \
+    else{                                                                                                                                               \
+        while(_tmp > 0){                                                                                                                                \
+                _current_digit = _tmp % 10;                                                                                                             \
+                _buffer[_index++] = (char)(48 + _current_digit);                                                                                        \
+                _tmp = _tmp / 10;                                                                                                                       \
+            }                                                                                                                                           \
+            _buffer[_index] = '\0';                                                                                                                     \
+        }                                                                                                                                               \
+        char* _res = reverse(_buffer);                                                                                                                  \
+        _res;                                                                                                                                           \
 })                                  
+
+
+//the buffer "_final_buffer" is to freed by the caller aka print()
+#define integer_to_string(number)({                                                                                                                      \
+    typeof(number) _number = number;                                                                                                                     \
+    static_assert(__builtin_types_compatible_p(typeof(_number),int16_t)  ||                                                                              \
+                  __builtin_types_compatible_p(typeof(_number),int32_t)  ||                                                                              \
+                  __builtin_types_compatible_p(typeof(_number),int64_t),"[Error] Substitution failure is an error(sfiae)");                              \
+    bool _is_negative = false;                                                                                                                           \
+    char _buffer[32];                                                                                                                                    \
+    char* _final_buffer = malloc(32);                                                                                                                    \
+    typeof(_number) _tmp = _number;                                                                                                                      \
+    typeof(_number) _index = 0;                                                                                                                          \
+    typeof(_number) _current_digit;                                                                                                                      \
+                                                                                                                                                         \
+    if(_number == 0){                                                                                                                                    \
+        _buffer[0] = 48;                                                                                                                                 \
+        _buffer[1] = '\0';                                                                                                                               \
+    }                                                                                                                                                    \
+    else{                                                                                                                                                \
+        if(_number < 0){                                                                                                                                 \
+            _is_negative = true;                                                                                                                         \
+            _tmp = -(_number);                                                                                                                           \
+        }                                                                                                                                                \
+                                                                                                                                                         \
+        while(_tmp > 0){                                                                                                                                 \
+            _current_digit = _tmp % 10;                                                                                                                  \
+            _buffer[_index++] = (char)(48 + _current_digit);                                                                                             \
+            _tmp = _tmp / 10;                                                                                                                            \
+        }                                                                                                                                                \
+         _buffer[_index] = '\0';                                                                                                                         \
+    }                                                                                                                                                    \
+                                                                                                                                                         \
+    /* dont forget to free at the end of return */                                                                                                       \
+    char* _reversed_buff = reverse(_buffer);                                                                                                             \
+                                                                                                                                                         \
+    if(_is_negative == true){                                                                                                                            \
+        _final_buffer[0] = '-';                                                                                                                          \
+        memcpy(_final_buffer+1,_reversed_buff,strlen(_reversed_buff)+1);                                                                                 \
+    }                                                                                                                                                    \
+    else{                                                                                                                                                \
+        memcpy(_final_buffer,_reversed_buff,strlen(_reversed_buff)+1);                                                                                   \
+    }                                                                                                                                                    \
+    free(_reversed_buff);                                                                                                                                \
+    _final_buffer;                                                                                                                                       \
+})                                                                             
+
 
 //char to str
 //int  to str
@@ -160,47 +208,89 @@ static inline const char* _2byte_uinteger_to_string(uint16_t number){
 })
 
 
-char* reverse(char* dst,char* src){
-        uint32_t sourceLength =  strlen(src);
-        for(int i = sourceLength-1 ; i >= 0 ; --i){
-            dst[(sourceLength-1) - i] = src[i];
+char* reverse(char* src){
+    uint32_t sourceLength =  strlen(src);
+    char* dst = malloc(sourceLength+1);
+    for(int i = sourceLength-1 ; i >= 0 ; --i){
+        dst[(sourceLength-1) - i] = src[i];
         }
-        dst[sourceLength] = '\0';
-        return dst;
+    dst[sourceLength] = '\0';
+    return dst;
+}
+
+[[maybe_unused]]
+void auto_free(void* ptr){
+    if(!ptr){
+        free(*(void**)ptr);
     }
-
-
+}
 
 
 void print_int(int x){
     printf("%d ",x);
 }
 
-void print_str(char* str){
-    printf("%s ",str);
-}
+#define print_str(string) ({    \
+    printf("%s ",string);       \
+})                              \
+
 void print_double(double x){
     printf("%.3f ",x);
 }
 
-#define print_one(x)   \
+/* define print_one(x)   \
     _Generic((x),       \
     int :  print_int,   \
     char* : print_str,   \
     const char* : print_str,   \
     double : print_double  \
     )(x)
+*/
+
+#define _integer_types(_number) __builtin_types_compatible_p(typeof(_number),int16_t) ||      \
+                  __builtin_types_compatible_p(typeof(_number),int32_t)     ||      \
+                  __builtin_types_compatible_p(typeof(_number),int64_t)
+
+#define _unsigned_types(_number) __builtin_types_compatible_p(typeof(_number),uint16_t)  ||    \
+                  __builtin_types_compatible_p(typeof(_number),uint32_t)       ||    \
+                  __builtin_types_compatible_p(typeof(_number),uint64_t)                  
+
+
+#define integer_types(number)                               \
+    int16_t :   printf("%s ",integer_to_string(number)),    \
+    int32_t :   printf("%s ",integer_to_string(number)),    \
+    int64_t :   printf("%s "integer_to_string(number)),     \
+
+#define unsigned_integer_types(number)              \
+    uint16_t : printf("%s ",unsigned_integer_to_string(number)),  \
+    uint32_t : printf("%s ",unsigned_integer_to_string(number)),  \
+    uint64_t : printf("%s ",unsigned_integer_to_string(number)),  \
+
+#define string_types(string)            \
+    char* : print("%s ",string),        \
+    const char* : print("%s ",string),  \
+
+#define print_one(x)   ({                                       \
+    _Generic((x),                                               \
+        integer_types(x)                                        \
+        unsigned_integer_types(x),                              \
+        string_types(x)                                         \
+    )                                                           \
+})
+
 
 #define print(...) FOR_EACH(print_one,__VA_ARGS__)    
 
 int main(){
-    char buff[128];
+    //char buff[128];
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wincompatible-pointer-types-discards-qualifiers"
     #pragma GCC diagnostic ignored "-Wgnu-statement-expression-from-macro-expansion"
 
-    printf("%s\n",reverse(buff,unsigned_integer_to_string((uint32_t)1230)));
+    print(12345);
 
     #pragma GCC diagnostic pop
+
+    
     return 0;
 }
